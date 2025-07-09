@@ -1,0 +1,12 @@
+%0 - CONF
+%A Wu, Jiachen
+%A Cao, Liangcai
+%T High-resolution wide-field microendoscopic imaging based on multi-frame fiber bundle images
+%X Coherent fiber bundles (CFBs) can transmit light from one end to the other in identical order, which are the important components of fiber endoscopes. However, the tiny fiber tip limits the field of view, and the inherent honeycomb artifact degrades the image quality. Here, we proposed a high-resolution wide-field microendoscopic imaging method. Multi-frame CFB images with random displacement are continuously captured during the observation. Motion parameters can be automatically estimated by alternate optimization with high-resolution and wide-field image instead of image registration. The method can provide strong support for the diagnosis and treatment of major diseases such as cancer.
+%V 12909
+%B SPIE OPTO
+%& PWO
+%D 2024
+%U https://doi.org/10.1117/12.3000779
+%DOI 10.1117/12.3000779
+%I SPIE

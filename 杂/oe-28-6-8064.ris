@@ -1,0 +1,27 @@
+TY  - JOUR
+TI  - Velocity measurements with structured light transmitted through a multimode optical fiber using digital optical phase conjugation
+AB  - Lensless fiber microendoscopes enable optical diagnostics and therapy with minimal invasiveness. Because of their small diameters, multimode fibers are ideal candidates, but mode scrambling hinders the transmission of structured light fields. We present the generation of a localized fringe system at variable distances from the distal fiber end by exploiting digital optical phase conjugation. The replayed fringe system was used for quantitative metrology. Velocity measurements of a microchannel flow in the immediate proximity of the fiber end without the use of any imaging lenses are shown. Lensless multimode fiber systems are of interest especially for biomedical imaging and stimulation as well as technical inspection and flow measurements.
+AU  - Büttner, Lars
+AU  - Thümmler, Martin
+AU  - Czarske, Jürgen
+PB  - Optica Publishing Group
+DA  - 2020/03/16
+PY  - 2020
+T2  - Optics Express
+J2  - Opt. Express
+JF  - Optics Express
+JO  - Opt. Express
+JA  - Opt. Express
+VL  - 28
+IS  - 6
+SP  - 8064
+EP  - 8075
+KW  - Biomedical imaging
+KW  - Light transmission
+KW  - Multicore fibers
+KW  - Optical diagnostics
+KW  - Phase conjugation
+KW  - Structured light
+UR  - https://opg.optica.org/oe/abstract.cfm?URI=oe-28-6-8064
+DO  - 10.1364/OE.386047
+ER  -

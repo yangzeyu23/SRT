@@ -1,0 +1,34 @@
+TY  - JOUR
+TI  - Structured light field 3D imaging
+AB  - In this paper, we propose a method by means of light field imaging under structured illumination to deal with high dynamic range 3D imaging. Fringe patterns are projected onto a scene and modulated by the scene depth then a structured light field is detected using light field recording devices. The structured light field contains information about ray direction and phase-encoded depth, via which the scene depth can be estimated from different directions. The multidirectional depth estimation can achieve high dynamic 3D imaging effectively. We analyzed and derived the phase-depth mapping in the structured light field and then proposed a flexible ray-based calibration approach to determine the independent mapping coefficients for each ray. Experimental results demonstrated the validity of the proposed method to perform high-quality 3D imaging for highly and lowly reflective surfaces.
+AU  - Cai, Zewei
+AU  - Liu, Xiaoli
+AU  - Peng, Xiang
+AU  - Yin, Yongkai
+AU  - Li, Ameng
+AU  - Wu, Jiachen
+AU  - Gao, Bruce Z.
+PB  - Optica Publishing Group
+DA  - 2016/09/05
+PY  - 2016
+T2  - Optics Express
+J2  - Opt. Express
+JF  - Optics Express
+JO  - Opt. Express
+JA  - Opt. Express
+VL  - 24
+IS  - 18
+SP  - 20324
+EP  - 20334
+KW  - Phase modulation
+KW  - Three-dimensional sensing
+KW  - Computational imaging 
+KW  - Image metrics
+KW  - Imaging techniques
+KW  - Optical imaging
+KW  - Plenoptic imaging
+KW  - Structured light
+KW  - Three dimensional imaging
+UR  - https://opg.optica.org/oe/abstract.cfm?URI=oe-24-18-20324
+DO  - 10.1364/OE.24.020324
+ER  -

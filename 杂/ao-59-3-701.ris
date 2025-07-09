@@ -1,0 +1,32 @@
+TY  - JOUR
+TI  - Structured light beams created through a multimode fiber via virtual Fourier filtering based on digital optical phase conjugation
+AB  - Digital optical phase conjugation (DOPC) is a newly developed technique in wavefront shaping to control light propagation through complex media. Currently, DOPC has been demonstrated for the reconstruction of two- and three-dimensional targets and enabled important applications in many areas. Nevertheless, the reconstruction results are only phase conjugated to the original input targets. Herein, we demonstrate that DOPC could be further developed for creating structured light beams through a multimode fiber (MMF). By applying annular filtering in the virtual Fourier domain of the acquired speckle field, we realize the creation of the quasi-Bessel and donut beams through the MMF. In principle, arbitrary amplitude and/or phase circular symmetry filtering could be performed in the Fourier domain, thus generating the corresponding point spread functions. We expect that the reported technique can be useful for super-resolution endoscopic imaging and optical manipulation through MMFs.
+AU  - Ma, Chaojie
+AU  - Di, Jianglei
+AU  - Dou, Jiazhen
+AU  - Li, Peng
+AU  - Xiao, Fajun
+AU  - Liu, Kaihui
+AU  - Bai, Xuedong
+AU  - Zhao, Jianlin
+PB  - Optica Publishing Group
+DA  - 2020/01/20
+PY  - 2020
+T2  - Applied Optics
+J2  - Appl. Opt.
+JF  - Applied Optics
+JO  - Appl. Opt.
+JA  - Appl. Opt.
+VL  - 59
+IS  - 3
+SP  - 701
+EP  - 705
+KW  - Multimode fibers
+KW  - Optical imaging
+KW  - Spatial light modulators
+KW  - Structured light
+KW  - Super resolution imaging
+KW  - Three dimensional reconstruction
+UR  - https://opg.optica.org/ao/abstract.cfm?URI=ao-59-3-701
+DO  - 10.1364/AO.380058
+ER  -

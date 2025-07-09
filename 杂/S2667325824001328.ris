@@ -1,0 +1,22 @@
+TY  - JOUR
+T1  - Lensless camera: Unraveling the breakthroughs and prospects
+AU  - Li, Shuowen
+AU  - Gao, Yunhui
+AU  - Wu, Jiachen
+AU  - Wang, Mingjie
+AU  - Huang, Zhangcheng
+AU  - Chen, Shumei
+AU  - Cao, Liangcai
+JO  - Fundamental Research
+PY  - 2024
+DA  - 2024/03/30/
+SN  - 2667-3258
+DO  - https://doi.org/10.1016/j.fmre.2024.03.019
+UR  - https://www.sciencedirect.com/science/article/pii/S2667325824001328
+KW  - Lensless camera
+KW  - Coded aperture imaging
+KW  - Metasurface
+KW  - Compressive sensing
+KW  - Deep learning
+AB  - Lensless imaging is an innovative and swiftly advancing technology at the intersection of optics, imaging technology, and computational science. It captures scene by directly recording the interference or diffraction patterns of light, subsequently utilizing algorithms to reconstruct the original image from these patterns. Lensless imaging transforms traditional imaging paradigms, offering newfound design flexibility and the capacity to seamlessly integrate within diverse imaging ecosystems. This paper aims to provide an overview of significant developments in optical modulation elements, image sensors, and reconstruction algorithms. The novel application scenarios that benefit from lensless computational imaging are presented. The opportunities and challenges associated with lensless camera are discussed for further improving its performance.
+ER  - 

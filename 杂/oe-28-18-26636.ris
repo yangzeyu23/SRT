@@ -1,0 +1,29 @@
+TY  - JOUR
+TI  - DeepCGH: 3D computer-generated holography using deep learning
+AB  - The goal of computer-generated holography (CGH) is to synthesize custom illumination patterns by modulating a coherent light beam. CGH algorithms typically rely on iterative optimization with a built-in trade-off between computation speed and hologram accuracy that limits performance in advanced applications such as optogenetic photostimulation. We introduce a non-iterative algorithm, DeepCGH, that relies on a convolutional neural network with unsupervised learning to compute accurate holograms with fixed computational complexity. Simulations show that our method generates holograms orders of magnitude faster and with up to 41% greater accuracy than alternate CGH techniques. Experiments in a holographic multiphoton microscope show that DeepCGH substantially enhances two-photon absorption and improves performance in photostimulation tasks without requiring additional laser power.
+AU  - Hossein Eybposh, M.
+AU  - Caira, Nicholas W.
+AU  - Atisa, Mathew
+AU  - Chakravarthula, Praneeth
+AU  - Pégard, Nicolas C.
+PB  - Optica Publishing Group
+DA  - 2020/08/31
+PY  - 2020
+T2  - Optics Express
+J2  - Opt. Express
+JF  - Optics Express
+JO  - Opt. Express
+JA  - Opt. Express
+VL  - 28
+IS  - 18
+SP  - 26636
+EP  - 26650
+KW  - Deep learning
+KW  - Holographic microscopy
+KW  - Light beams
+KW  - Multiphoton microscopy
+KW  - Neural networks
+KW  - Spatial light modulators
+UR  - https://opg.optica.org/oe/abstract.cfm?URI=oe-28-18-26636
+DO  - 10.1364/OE.399624
+ER  -

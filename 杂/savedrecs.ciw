@@ -1,0 +1,96 @@
+FN Clarivate Analytics Web of Science
+VR 1.0
+PT J
+AU Chen, HS
+   Fontaine, NK
+   Ryf, R
+   Neilson, DT
+   Winzer, P
+AF Chen, Haoshuo
+   Fontaine, Nicolas K.
+   Ryf, Roland
+   Neilson, David T.
+   Winzer, Peter
+TI Remote Spatio-Temporal Focusing Over Multimode Fiber Enabled by
+   Single-Ended Channel Estimation
+SO IEEE JOURNAL OF SELECTED TOPICS IN QUANTUM ELECTRONICS
+LA English
+DT Article
+DE Mode division multiplexing; digital signal processing; coherence
+   control; channel estimation; endoscopy
+ID BANDWIDTH; LIGHT; TIME; TRANSMITTER
+AB Multimode fiber (MMF) is attractive for a variety of applications requiring a large number of spatially overlapped modes including biophotonics and telecommunications. Superimposing these modes at the input by controlling the amplitude and phase of each individual mode can form arbitrarily structured light at the distal end of the MMF, which provides the possibility for ultra-thin fiber endoscopy, miniature multi-photon microscopy, and remote beam forming. Realistic deployment of this technology for example in a flexible endoscope would require a technique to continuously calculate the proper input modal superpositions over a large bandwidth as the fiber is perturbed without access to the distal end of the fiber. Here, we propose a single-ended channel estimation scheme which can measure broad-band MMF transfer matrix at the transmitter employing reflective spatial pilots at the distal end of the MMF. Broadband multiple-input-multiple-output (MIMO) preprocessing is realized through electro-optic modulation for undoing mode scrambling, mitigating modal dispersion and achieving remote coherence control. We demonstrate spatial and temporal mode focusing at the receiver over an MMF guiding six spatial and polarization modes.
+C1 [Chen, Haoshuo; Fontaine, Nicolas K.; Ryf, Roland; Neilson, David T.; Winzer, Peter] Nokia Bell Labs, Holmdel, NJ 07733 USA.
+C3 Nokia Corporation; Nokia Bell Labs
+RP Chen, HS (corresponding author), Nokia Bell Labs, Holmdel, NJ 07733 USA.
+EM haoshuo.chen@nokia-bell-labs.com; nicolas.fontaine@nokia-bell-labs.com;
+   roland.ryf@nokia.com; david.neilson@nokia-bell-labs.com;
+   peter.winzer@ieee.org
+RI Winzer, Peter/AFW-0783-2022
+OI Ryf, Roland/0000-0002-8883-5349
+CR [Anonymous], FRONTIERS OPT
+   Carpenter J, 2012, J LIGHTWAVE TECHNOL, V30, P3946, DOI 10.1109/JLT.2012.2206562
+   Chen HC, 2017, ACSR ADV COMPUT, V74, P1
+   Chen HS, 2014, OPT EXPRESS, V22, P31582, DOI 10.1364/OE.22.031582
+   Cheng HG, 2018, POSTGRAD MED, V130, P568, DOI 10.1080/00325481.2018.1495541
+   Choi Y, 2012, PHYS REV LETT, V109, DOI 10.1103/PhysRevLett.109.203901
+   Cizmár T, 2011, OPT EXPRESS, V19, P18871, DOI 10.1364/OE.19.018871
+   Fontaine N., 2013, Optical Fiber Communication Conference and Exposition and the National Fiber Optic Engineers Conference (OFC/NFOEC), 2013, P1
+   Fontaine NK, 2019, NAT COMMUN, V10, DOI 10.1038/s41467-019-09840-4
+   Fontaine NK, 2015, 2015 OPTICAL FIBER COMMUNICATIONS CONFERENCE AND EXHIBITION (OFC)
+   Fontaine NK, 2012, OPT EXPRESS, V20, P27123, DOI 10.1364/OE.20.027123
+   Franz B, 2013, BELL LABS TECH J, V18, P153, DOI 10.1002/bltj.21632
+   Geisler DJ, 2011, OPT EXPRESS, V19, P8242, DOI 10.1364/OE.19.008242
+   Gross S, 2014, LASER PHOTONICS REV, V8, pL81, DOI 10.1002/lpor.201400078
+   Grüner-Nielsen L, 2012, J LIGHTWAVE TECHNOL, V30, P3693, DOI 10.1109/JLT.2012.2227243
+   Gu RY, 2015, OPT EXPRESS, V23, P26905, DOI 10.1364/OE.23.026905
+   Guan BB, 2016, J LIGHTWAVE TECHNOL, V34, P737, DOI 10.1109/JLT.2015.2506559
+   Ho KP, 2011, J LIGHTWAVE TECHNOL, V29, P3119, DOI 10.1109/JLT.2011.2165316
+   Hosseini A, 2017, OPT EXPRESS, V25, P18853, DOI 10.1364/OE.25.018853
+   Huang B, 2015, OPT EXPRESS, V23, P224, DOI 10.1364/OE.23.000224
+   Lerosey G, 2004, PHYS REV LETT, V92, DOI 10.1103/PhysRevLett.92.193904
+   Mahalati RN, 2012, OPT EXPRESS, V20, P14321, DOI 10.1364/OE.20.014321
+   Morales-Delgado EE, 2015, OPT EXPRESS, V23, P9109, DOI 10.1364/OE.23.009109
+   Mosk AP, 2012, NAT PHOTONICS, V6, P283, DOI [10.1038/NPHOTON.2012.88, 10.1038/nphoton.2012.88]
+   Mounaix M, 2016, PHYS REV A, V94, DOI 10.1103/PhysRevA.94.041802
+   Ogiso Y, 2017, J LIGHTWAVE TECHNOL, V35, P1450, DOI 10.1109/JLT.2016.2639542
+   Ohayon S, 2018, BIOMED OPT EXPRESS, V9, P1492, DOI 10.1364/BOE.9.001492
+   Papadopoulos IN, 2012, OPT EXPRESS, V20, P10583, DOI 10.1364/OE.20.010583
+   Piels M, 2015, IEEE PHOTONIC TECH L, V27, P631, DOI 10.1109/LPT.2014.2387092
+   Plöschner M, 2015, NAT PHOTONICS, V9, P529, DOI [10.1038/nphoton.2015.112, 10.1038/NPHOTON.2015.112]
+   Randel S, 2015, IEEE PHOTON CONF
+   Turtaev S, 2018, LIGHT-SCI APPL, V7, DOI 10.1038/s41377-018-0094-x
+   van Beijnum F, 2011, OPT LETT, V36, P373, DOI 10.1364/OL.36.000373
+   van Uden RGH, 2014, OPT EXPRESS, V22, P12668, DOI 10.1364/OE.22.012668
+   Vasquez-Lopez SA, 2018, LIGHT-SCI APPL, V7, DOI 10.1038/s41377-018-0111-0
+   Vellekoop IM, 2007, OPT LETT, V32, P2309, DOI 10.1364/OL.32.002309
+   Xia C, 2015, OPT EXPRESS, V23, P1151, DOI 10.1364/OE.23.001151
+NR 37
+TC 15
+Z9 17
+U1 0
+U2 17
+PU IEEE-INST ELECTRICAL ELECTRONICS ENGINEERS INC
+PI PISCATAWAY
+PA 445 HOES LANE, PISCATAWAY, NJ 08855-4141 USA
+SN 1077-260X
+EI 1558-4542
+J9 IEEE J SEL TOP QUANT
+JI IEEE J. Sel. Top. Quantum Electron.
+PD JUL-AUG
+PY 2020
+VL 26
+IS 4
+AR 7701809
+DI 10.1109/JSTQE.2020.2979241
+PG 9
+WC Engineering, Electrical & Electronic; Quantum Science & Technology;
+   Optics; Physics, Applied
+WE Science Citation Index Expanded (SCI-EXPANDED)
+SC Engineering; Physics; Optics
+GA KZ7TV
+UT WOS:000523463000001
+DA 2025-03-25
+ER
+
+EF

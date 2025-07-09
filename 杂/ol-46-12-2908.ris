@@ -1,0 +1,28 @@
+TY  - JOUR
+TI  - High-speed computer-generated holography using an autoencoder-based deep neural network
+AB  - Learning-based computer-generated holography (CGH) provides a rapid hologram generation approach for holographic displays. Supervised training requires a large-scale dataset with target images and corresponding holograms. We propose an autoencoder-based neural network (holoencoder) for phase-only hologram generation. Physical diffraction propagation was incorporated into the autoencoder’s decoding part. The holoencoder can automatically learn the latent encodings of phase-only holograms in an unsupervised manner. The proposed holoencoder was able to generate high-fidelity 4K resolution holograms in 0.15 s. The reconstruction results validate the good generalizability of the holoencoder, and the experiments show fewer speckles in the reconstructed image compared with the existing CGH algorithms.
+AU  - Wu, Jiachen
+AU  - Liu, Kexuan
+AU  - Sui, Xiaomeng
+AU  - Cao, Liangcai
+PB  - Optica Publishing Group
+DA  - 2021/06/15
+PY  - 2021
+T2  - Optics Letters
+J2  - Opt. Lett.
+JF  - Optics Letters
+JO  - Opt. Lett.
+JA  - Opt. Lett.
+VL  - 46
+IS  - 12
+SP  - 2908
+EP  - 2911
+KW  - Diffraction optics
+KW  - Fourier transforms
+KW  - Holographic displays
+KW  - Neural networks
+KW  - Spatial light modulators
+KW  - Speckle imaging
+UR  - https://opg.optica.org/ol/abstract.cfm?URI=ol-46-12-2908
+DO  - 10.1364/OL.425485
+ER  -
