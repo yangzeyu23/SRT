@@ -8,8 +8,8 @@ addpath('./function');
 load HoloEncoder_untrained.mat
 
 % load dataset
-trainImagePath = 'C:\Users\25302\Desktop\SRT\DIV2K\DIV2K_train_HR';
-validImagePath = 'C:\Users\25302\Desktop\SRT\DIV2K\DIV2K_valid_HR';
+trainImagePath = 'D:\DIV2K\DIV2K_train_HR';
+validImagePath = 'D:\DIV2K\DIV2K_valid_HR';
 trainimds = imageDatastore(trainImagePath,'IncludeSubfolders',true);
 trainAugimds = augmentedImageDatastore([2160 3840],trainimds,'ColorPreprocessing',"rgb2gray");
 validimds = imageDatastore(validImagePath,'IncludeSubfolders',true);
