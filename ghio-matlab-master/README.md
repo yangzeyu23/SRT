@@ -33,9 +33,9 @@ Developed by S. Marchesini *et al*. [4].
 
 ### Syntax
 ```
-gshrinkwrap(Fabs, n1, uknwn, gen, n2);
-gshrinkwrap(Fabs, n1, ukwn, gen, n2, alpha);
-gshrinkwrap(Fabs, n1, ukwn, gen, n2, alpha, sigma, cutoff1, cutoff2);
+shrinkwrap(Fabs, n1, uknwn, gen, n2);
+shrinkwrap(Fabs, n1, ukwn, gen, n2, alpha);
+shrinkwrap(Fabs, n1, ukwn, gen, n2, alpha, sigma, cutoff1, cutoff2);
 ```
 
 ### Description

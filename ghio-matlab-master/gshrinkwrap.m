@@ -11,98 +11,98 @@
 % v.2 2014/06/06 : multiple following runs
 % v.3 2014/06/09 : use "template" to update each replica
 
-function [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n, checker, gen, n2, rep, varargin) 
-
-
-% default parameters;
-alpha = [];
-sig = 3;
-cutoff1 = 0.04;
-cutoff2 = 0.2;
-
-
-% handle additional aruguments
-if ~isempty(varargin)
-    alpha = varargin{1};
-    if length(varargin) > 1
-        sig = varargin{2};
-        if length(varargin) > 2
-            cutoff1 = varargin{3};
-            if length(varargin) > 3
-                cutoff2 = varargin{4};
+function [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n1, checker, gen, n2, rep, varargin)
+    % Enhanced guided shrink-wrap with parallel support
+    
+    % Parameter handling
+    alpha = [];
+    sig = 3;
+    cutoff1 = 0.04;
+    cutoff2 = 0.2;
+    
+    if ~isempty(varargin)
+        alpha = varargin{1};
+        if length(varargin) > 1
+            sig = varargin{2};
+            if length(varargin) > 2
+                cutoff1 = varargin{3};
+                if length(varargin) > 3
+                    cutoff2 = varargin{4};
+                end
             end
         end
     end
-end
 
-S = fftshift( ifft2(abs(Fabs).^2, 'symmetric') );
-S = S > cutoff1*max(S(:));
+    % Initial support from autocorrelation
+    S = fftshift(ifft2(abs(Fabs).^2, 'symmetric'));
+    S = S > cutoff1*max(S(:));
 
-% pre-allocated spaces
-R   = zeros( size(Fabs, 1), size(Fabs, 2), gen+1);
-Sup = false( size(Fabs, 1), size(Fabs, 2), gen+1);
-Sup(:,:,1) = S;
-
-% pre-allocated spaces for parallel
-Rtmp = zeros( size(Fabs, 1), size(Fabs, 2), rep);
-Ftmp = zeros( size(Fabs, 1), size(Fabs, 2), rep);
-Mtmp = zeros( size(Fabs, 1), size(Fabs, 2), rep);
-Stmp = false( size(Fabs, 1), size(Fabs, 2), rep);
-efs = zeros(gen+1, rep);
-
-
-% first run with initial support from auto-correlation map
-parfor r = 1:rep
-    Rtmp(:,:,r) = hio2d(Fabs, S, n, checker, alpha);
-    Ftmp(:,:,r) = fft2( Rtmp(:,:,r) );
-    efs(1,r) = ef(Fabs, Ftmp(:,:,r), checker), 
-end
-
-% select best replica
-[my, mx] = min(efs(1,:));
-disp('seed:');
-disp(['replica #' int2str(mx) ' with EF = ' num2str(my) ' selected']);
-R(:,:,1) = Rtmp(:,:,mx);
-
-% make Gaussian kernel
-x = (1:size(S,2)) - ceil(size(S,2)/2) - 1;
-y = (1:size(S,1)) - ceil(size(S,1)/2) - 1;
-[X, Y] = meshgrid(x, y);
-rad = sqrt(X.^2 + Y.^2);
-
-
-% shrink-wrap
-for g = 2:(gen+1)
-    Rmodel = R(:,:,g-1);
-    % Rmodel( Rmodel < 0 ) = 0; % just in case
-    % Rtmp( Rtmp < 0 ) = 0;
+    % Pre-allocation
+    base_size = size(Fabs);
+    R = zeros([base_size, gen+1]);
+    Sup = false([base_size, gen+1]);
+    Sup(:,:,1) = S;
     
+    Rtmp = zeros([base_size, rep]);
+    Ftmp = zeros([base_size, rep]);
+    Mtmp = zeros([base_size, rep]);
+    Stmp = false([base_size, rep]);
+    efs = zeros(gen+1, rep);
+
+    % Gaussian kernel
+    x = (1:base_size(2)) - ceil(base_size(2)/2) - 1;
+    y = (1:base_size(1)) - ceil(base_size(1)/2) - 1;
+    [X, Y] = meshgrid(x, y);
+    rad = sqrt(X.^2 + Y.^2);
+
+    % First generation
     parfor r = 1:rep
-        % real-space improvement 
-        Rtmp(:,:,r) = myalign( Rmodel, Rtmp(:,:,r) );
-        Rtmp(:,:,r) = sign( Rtmp(:,:,r) )...
-         .* sqrt( abs( Rtmp(:,:,r) .* Rmodel ) );
-        G = fft2(exp(-(rad./sqrt(2)./sig).^2));
-        % make new support
-        Mtmp(:,:,r) = fftshift( ifft2( fft2(Rtmp(:,:,r)) .* G, 'symmetric') );
-        Stmp(:,:,r) = ( Mtmp(:,:,r) >= cutoff2*max(max(Mtmp(:,:,r))) );
-        % run hio
-        Rtmp(:,:,r) = hio2d(fft2(Rtmp(:,:,r)), Stmp(:,:,r), n2, checker, alpha);
-        % Fourier transform for EF
-        Ftmp(:,:,r) = Rtmp(:,:,r) .* Stmp(:,:,r);
-        Ftmp(:,:,r) = fft2( Rtmp(:,:,r) );
-        efs(g,r) = ef(Fabs, Ftmp(:,:,r), checker), 
+        try
+            Rtmp(:,:,r) = hio2d(Fabs, S, n1, checker, alpha);
+            Ftmp(:,:,r) = fft2(Rtmp(:,:,r));
+            efs(1,r) = ef(Fabs, Ftmp(:,:,r), checker);
+        catch
+            Rtmp(:,:,r) = zeros(base_size);
+            efs(1,r) = inf;
+        end
     end
-    % EF analysis
-    [my, mx] = min(efs(g,:));
-    disp(['after generation ' int2str(g) ':']);
-    disp(['replica #' int2str(mx) ' with EF = ' num2str(my) ' selected']);
-    R(:,:,g) = Rtmp(:,:,mx);
-    Sup(:,:,g) = Stmp(:,:,mx);
-    % smaller the kernel size
-    if sig > 1.5
-        sig = sig * 0.99;
+
+    % Select best replica
+    [~, mx] = min(efs(1,:));
+    R(:,:,1) = Rtmp(:,:,mx);
+
+    % Shrink-wrap iterations
+    for g = 2:(gen+1)
+        Rmodel = R(:,:,g-1);
+        
+        parfor r = 1:rep
+            try
+                % Alignment and mixing
+                aligned = myalign(Rmodel, Rtmp(:,:,r));
+                Rtmp(:,:,r) = sign(aligned) .* sqrt(abs(aligned .* Rmodel));
+                
+                % Support update
+                G = fft2(exp(-(rad/sqrt(2)/sig).^2));
+                Mtmp(:,:,r) = fftshift(ifft2(fft2(Rtmp(:,:,r)) .* G, 'symmetric'));
+                Stmp(:,:,r) = (Mtmp(:,:,r) >= cutoff2*max(Mtmp(:,:,r), [], 'all'));
+                
+                % HIO with new support
+                Rtmp(:,:,r) = hio2d(fft2(Rtmp(:,:,r)), Stmp(:,:,r), n2, checker, alpha);
+                Ftmp(:,:,r) = fft2(Rtmp(:,:,r));
+                efs(g,r) = ef(Fabs, Ftmp(:,:,r), checker);
+            catch
+                efs(g,r) = inf;
+            end
+        end
+        
+        % Selection
+        [~, mx] = min(efs(g,:));
+        R(:,:,g) = Rtmp(:,:,mx);
+        Sup(:,:,g) = Stmp(:,:,mx);
+        
+        % Kernel shrinkage
+        if sig > 1.5
+            sig = sig * 0.99;
+        end
     end
 end
-
-
