@@ -46,6 +46,7 @@ test_wavefront = object_quantized_normalized;
 disp(['测试波前已准备完成，尺寸 ' num2str(image_size) 'x' num2str(image_size) '，包含 ' num2str(num_gray_levels) ' 个灰度级。']);
 
 %% 2. 模拟衍射：计算频率域分布强度 (Fabs_data)
+
 % 仍然使用夫琅禾费衍射近似，即直接进行傅里叶变换
 F_test_wavefront = fft2(test_wavefront);
 
@@ -69,7 +70,7 @@ S = true(image_size, image_size);
 disp('初始空间域支撑已定义。');
 
 %% 4. 执行 HIO 算法进行图像重建
-n_iterations = 3000; % 增加迭代次数以更好地收敛多灰度级图像
+n_iterations = 10000; % 增加迭代次数以更好地收敛多灰度级图像
 
 % 调用 hio2d 函数进行重建
 R_reconstructed = hio2d(Fabs_data, S, n_iterations);
@@ -94,7 +95,12 @@ imshow(abs(R_reconstructed), []); % 显示重建图像的幅度
 title('HIO 重建结果 (空间域)');
 colormap(gca, gray);
 
-% 计算并显示频率域误差 (需要 ef.m)
-% checker = false(image_size, image_size); % 假设没有需要排除的区域
-% final_ef_error = ef(Fabs_data, fft2(R_reconstructed), checker);
-% disp(['最终频率域误差 (EF): ' num2str(final_ef_error)]);
+%%计算并显示频率域误差 (需要 ef.m)
+checker = false(image_size, image_size); % 假设没有需要排除的区域
+final_ef_error = ef(Fabs_data, fft2(R_reconstructed), checker);
+disp(['最终频率域误差 (EF): ' num2str(final_ef_error)]);
+
+%% 计算空间域误差 (需要 er.m)
+space_error = er(test_wavefront, R_reconstructed, S);
+disp(['空间域误差 (ER): ' num2str(space_error)]);
+disp('测试完成。');
