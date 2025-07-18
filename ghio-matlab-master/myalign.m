@@ -1,29 +1,54 @@
-function B = myalign(A, B)
-    % 计算 A 和当前 B 之间的互相关
-    xcorr1 = fftshift( ifft2( fft2(A) .* conj(fft2(B)) ) );
-    % 寻找全局最大值
-    [y1, idx1] = max(xcorr1(:));
-    [cr1, cc1] = ind2sub(size(xcorr1), idx1); % 将线性索引转换为行/列索引
+function [aligned_image] = myalign(reference_image, image_to_align)
+% MYALIGN: 使用相位相关方法将图像进行对齐。
+%   此函数计算 'image_to_align' 相对于 'reference_image' 的像素位移，
+%   并应用此位移，使其与参考图像对齐。
+%   它利用相位相关方法，该方法对亮度变化不敏感，适用于衍射图像重建中的对齐任务。
 
-    % 计算 A 和 180 度旋转后的 B 之间的互相关
-    B_rot = rot90(B, 2); % 180度旋转
-    xcorr2 = fftshift( ifft2( fft2(A) .* conj(fft2(B_rot)) ) );
-    % 寻找全局最大值
-    [y2, idx2] = max(xcorr2(:));
-    [cr2, cc2] = ind2sub(size(xcorr2), idx2);
+    % 获取图像尺寸，用于后续的零填充和结果裁剪。
+    [rows, cols] = size(reference_image);
 
-    % 比较两个相关峰的高度，选择最佳的对齐方式
-    if y2 > y1
-        B = B_rot; % 采用旋转后的 B
-        r_shift = cr2 - round(size(A,1)/2); % 计算行方向的偏移量
-        c_shift = cc2 - round(size(A,2)/2); % 计算列方向的偏移量
-        disp(['myalign: 已反转并偏移 (' int2str(r_shift) ', ' int2str(c_shift) ').']);
-    else
-        r_shift = cr1 - round(size(A,1)/2); % 计算行方向的偏移量
-        c_shift = cc1 - round(size(A,2)/2); % 计算列方向的偏移量
-        disp(['myalign: 已偏移 (' int2str(r_shift) ', ' int2str(c_shift) ').']);
+    % 进行零填充以避免傅里叶变换中的周期性卷绕伪影（wraparound artifacts）。
+    % 填充到至少两倍原图尺寸，并且填充后的尺寸最好是2的幂次方，
+    % 以优化FFT算法的计算效率。
+    padded_rows = 2^nextpow2(rows * 2);
+    padded_cols = 2^nextpow2(cols * 2);
+
+    % 计算参考图像和待对齐图像的傅里叶变换（应用零填充）。
+    FA = fft2(reference_image, padded_rows, padded_cols);
+    FB = fft2(image_to_align, padded_rows, padded_cols);
+
+    % 计算互功率谱 (Cross-Power Spectrum)。
+    % 互功率谱的逆傅里叶变换其峰值表示了图像的位移。
+    % 公式: R_AB = F_A^* * F_B / |F_A^* * F_B|
+    % 添加一个非常小的正数 (eps) 到分母中，以防止在分母为零时发生除法错误。
+    cross_power_spectrum = (conj(FA) .* FB) ./ (abs(conj(FA) .* FB) + eps);
+
+    % 对互功率谱进行逆傅里叶变换，得到相关图。
+    % 相关图中的峰值位置指示了两幅图像之间的精确像素位移。
+    % real() 函数用于处理由于浮点计算精度问题可能产生的微小虚部，确保结果为实数图像。
+    correlation_map = real(ifft2(cross_power_spectrum));
+
+    % 寻找相关图中的峰值位置。
+    % 峰值最大值对应的坐标即为位移量。
+    [~, max_idx] = max(correlation_map(:)); % 找到最大值及其在数组中的线性索引
+    [y_peak, x_peak] = ind2sub(size(correlation_map), max_idx); % 将线性索引转换为行列坐标
+
+    % 计算图像的像素位移量 (shift_y, shift_x)。
+    % 逆傅里叶变换的结果默认以 (1,1) 作为零位移点。
+    % 如果峰值位于填充图像的下半部分或右半部分，则表示负向位移。
+    shift_y = y_peak - 1; % 初始计算从1开始的位移量
+    if shift_y > padded_rows / 2
+        shift_y = shift_y - padded_rows; % 转换为负位移，处理周期性边界效应
     end
 
-    % 应用循环移位进行对齐
-    B = circshift(B, [r_shift, c_shift]);
+    shift_x = x_peak - 1; % 初始计算从1开始的位移量
+    if shift_x > padded_cols / 2
+        shift_x = shift_x - padded_cols; % 转换为负位移
+    end
+
+    % 将计算出的位移量应用到原始大小的待对齐图像上。
+    % MATLAB 的 circshift 函数可以高效地实现图像的周期性像素位移。
+    % 注意：这里的 circshift 是对原始图像尺寸操作，而非填充后的图像。
+    aligned_image = circshift(image_to_align, [shift_y, shift_x]);
+
 end

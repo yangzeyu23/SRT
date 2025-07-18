@@ -88,84 +88,123 @@ try
         % 限制并行核心数，避免资源过度占用
         parpool('Processes', min(config.rep, feature('numcores')));
     end
-
-    tic; 
-    [R_reconstructed_all_reps, S_all_gens, ~, efs_all_reps] = gshrinkwrap(...
-        Fabs_noisy, ...               % 衍射幅度数据 (含噪声)
-        config.n1, ...                % 初始迭代次数
-        config.checker, ...           % 未知区域标记 (这里没有)
-        config.gen, ...               % 收缩包裹代数
-        config.n2, ...                % 每代迭代次数
-        config.rep, ...               % 并行副本数
-        config.alpha, ...             % OSS参数
-        config.sigma, ...             % 高斯模糊初始标准差
-        config.cutoff1, ...           % 自相关阈值 (用于内部生成初始支撑)
-        config.cutoff2, ...           % 支撑更新阈值
-        config.beta);                 % HIO反馈系数
-    time_elapsed = toc; % 结束计时
     
+    tic;
+    [R_reconstructed_all_reps, S_all_gens, ~, efs_all_reps] = gshrinkwrap(...
+        Fabs_noisy, ... % 衍射幅度数据 (含噪声)
+        config.n1, ... % 初始迭代次数
+        config.checker, ... % 未知区域标记 (这里没有)
+        config.gen, ... % 收缩包裹代数
+        config.n2, ... % 每代迭代次数
+        config.rep, ... % 并行副本数
+        config.alpha, ... % OSS参数
+        config.sigma, ... % 高斯模糊初始标准差
+        config.cutoff1, ... % 自相关阈值 (用于内部生成初始支撑)
+        config.cutoff2, ... % 支撑更新阈值
+        config.beta); % HIO反馈系数
+    time_elapsed = toc; % 结束计时
+
     disp(' ');
     disp(['重建完成! 总耗时: ', num2str(time_elapsed/60, '%.1f'), ' 分钟']);
 
 catch ME
+    warning('重建失败！正在尝试关闭并行池，错误信息：%s', ME.message);
+    % 确保错误发生时关闭并行池
     if ~isempty(gcp('nocreate'))
         delete(gcp('nocreate'));
     end
-    error('重建过程中在 gshrinkwrap 或其依赖函数内部发生错误: %s', ME.message);
+    rethrow(ME); % 重新抛出错误，中断脚本执行
 end
 
-%%  6. 误差计算 
+% 确保关闭并行池
+if ~isempty(gcp('nocreate'))
+    delete(gcp('nocreate'));
+end
 
-% efs_all_reps 是一个 (gen+1) x rep 的矩阵，表示每代每个副本的EF误差
-[~, best_rep_idx] = min(efs_all_reps(end, :)); 
-R_final_reconstructed = R_reconstructed_all_reps(:,:,best_rep_idx); 
+%% ==================== 6. 结果评估 ====================
+[~, best_rep_idx] = min(efs_all_reps(end,:)); % 找到最后一世代EF误差最小的副本索引
+R_final_reconstructed = R_reconstructed_all_reps(:,:,best_rep_idx); % 获取最终重建结果
 
-final_ef_error = ef(Fabs_noisy, fft2(R_final_reconstructed), config.checker);
-disp(['最终频率域误差 (EF): ', num2str(final_ef_error, '%.4f')]);
+% 计算最终的EF和ER误差
+final_ef = ef(Fabs_noisy, fft2(R_final_reconstructed), config.checker);
+final_er = er(test_wavefront, abs(R_final_reconstructed), []);
 
-final_er_error = er(test_wavefront, abs(R_final_reconstructed), []);
-disp(['最终实空间误差 (ER): ', num2str(final_er_error, '%.4f')]);
+fprintf('\n----------------------------------------------------\n');
+fprintf('重建完成！\n');
+fprintf('原始最佳副本的最终EF误差: %.4f\n', final_ef);
+fprintf('原始最佳副本的最终ER误差: %.4f\n', final_er);
+fprintf('----------------------------------------------------\n');
 
-%%  7. 可视化 
+%% ==================== 第七阶段：手动对齐 (交互式) ====================
+% 在显示最终重建结果R_final_reconstructed之后，添加此段代码
+fprintf('\n----------------------------------------------------\n');
+fprintf('  手动对齐模式：请点击重建图像中的目标中心。\n');
+fprintf('  （点击后窗口会自动关闭，然后显示最终对比图）\n');
+fprintf('----------------------------------------------------\n');
 
-figure('Name', '圆形光斑重建结果', 'Position', [100, 100, 1400, 600]);
+% 显示最终重建结果，让用户点击中心
+h_ginput_fig = figure('Name', '点击图像中心进行手动对齐', 'NumberTitle', 'off');
+imshow(abs(R_final_reconstructed), []); % 使用最终重建结果
+title('点击图像的中心点，然后按Enter键');
+axis on; % 显示坐标轴，便于观察
 
+% 等待用户点击
+[x_click, y_click] = ginput(1); % 获取用户点击的坐标
+close(h_ginput_fig); % 关闭ginput的交互窗口
+
+% 计算图像中心点
+[rows, cols] = size(R_final_reconstructed);
+image_center_x = cols / 2 + 0.5; % 确保中心点是浮点数，对于偶数/奇数尺寸都适用
+image_center_y = rows / 2 + 0.5;
+
+% 计算所需的平移量
+shift_x_manual = round(image_center_x - x_click);
+shift_y_manual = round(image_center_y - y_click);
+
+fprintf('检测到手动平移量：X=%d, Y=%d\n', shift_x_manual, shift_y_manual);
+
+% 应用手动平移
+R_reconstructed_manual_aligned = circshift(R_final_reconstructed, [shift_y_manual, shift_x_manual]);
+
+% 重新计算手动对齐后的EF和ER误差
+manual_ef_after_shift = ef(Fabs_noisy, fft2(R_reconstructed_manual_aligned), config.checker);
+manual_er_after_shift = er(test_wavefront, abs(R_reconstructed_manual_aligned), []);
+fprintf('手动对齐后 EF 误差: %.4f, ER 误差: %.4f\n', manual_ef_after_shift, manual_er_after_shift);
+
+%% ==================== 第八阶段：可视化输出 (整合显示) ====================
+% 调整图窗大小以容纳更多子图
+figure('Name', '重建结果对比', 'NumberTitle', 'off', 'Position', [50, 50, 1500, 800]); 
+
+% 原始图像
 subplot(2, 4, 1);
 imshow(test_wavefront, []);
-title('原始圆形光斑');
+title('原始图像');
 colormap(gca, gray);
 
+% 衍射图样 (对数显示)
 subplot(2, 4, 2);
-imshow(log(Fabs_data_shifted + 1), []); 
-title('模拟衍射图样 (对数显示)');
-colormap(gca, hot); 
+imshow(log(Fabs_data_shifted + 1), []);
+title('衍射图样 (对数显示)');
+colormap(gca, hot);
 
+% 原始重建结果
 subplot(2, 4, 3);
-imshow(abs(R_final_reconstructed), []); 
-title(['最佳重建: EF=', num2str(final_ef_error, '%.3f')]);
-colormap(gca, gray);
+imshow(abs(R_final_reconstructed), []);
+title(['原始重建 (EF=', num2str(final_ef, '%.3f'), ', ER=', num2str(final_er, '%.3f'), ')']);
+colormap(gca, jet); % 使用彩色图
+colorbar; % 添加色条
 
+% 原始绝对误差图
 subplot(2, 4, 4);
-error_map = abs(abs(R_final_reconstructed) - test_wavefront);
-imshow(error_map, []);
-title('绝对误差');
-colormap(gca, jet); 
-colorbar;
+error_map_original = abs(abs(R_final_reconstructed) - test_wavefront);
+imshow(error_map_original, []);
+title('原始绝对误差图');
+colormap(gca, jet); % 使用彩色图
+colorbar; % 添加色条
 
-% 初始支撑 (从 gshrinkwrap 内部获取，或者我们可以基于外部定义的cutoff1重绘)
-% 为了与 gshrinkwrap 内部生成方式一致，这里不再直接使用 S_initial，
-% 而是尝试从 S_all_gens 中提取第1代支撑。
+% 最终收敛支撑
 subplot(2, 4, 5);
-if ~isempty(S_all_gens) && size(S_all_gens, 3) >= 1
-    imshow(S_all_gens(:,:,1), []);
-    title('初始支撑 (gshrinkwrap内部生成)');
-else
-    text(0.5, 0.5, '无法获取初始支撑', 'HorizontalAlignment', 'center');
-end
-colormap(gca, gray);
-
-subplot(2, 4, 6);
-if ~isempty(S_all_gens) && size(S_all_gens, 3) == config.gen + 1
+if size(S_all_gens, 3) == config.gen + 1
     imshow(S_all_gens(:,:,config.gen+1), []); 
     title('最终收敛支撑');
 else
@@ -173,9 +212,17 @@ else
 end
 colormap(gca, gray);
 
+% 手动对齐后的重建结果 (新增加的子图)
+subplot(2, 4, 6);
+imshow(abs(R_reconstructed_manual_aligned), []);
+title(['手动对齐后重建 (EF=', num2str(manual_ef_after_shift, '%.3f'), ', ER=', num2str(manual_er_after_shift, '%.3f'), ')']);
+colormap(gca, jet); % 使用彩色图
+colorbar; % 添加色条
+
+% 收敛曲线 (各代最佳EF)
 subplot(2, 4, 7);
 if ~isempty(efs_all_reps) && size(efs_all_reps, 1) == config.gen + 1
-    best_efs_per_gen = min(efs_all_reps, [], 2); 
+    best_efs_per_gen = min(efs_all_reps, [], 2); % 每代所有副本中的最佳EF
     plot(0:config.gen, best_efs_per_gen, 'b', 'LineWidth', 2); % 从第0代开始
     xlabel('世代数');
     ylabel('最佳EF误差');
@@ -187,33 +234,27 @@ else
     disp(['预期行数 (config.gen + 1): ', num2str(config.gen + 1)]);
     if ~isempty(efs_all_reps)
         best_efs_per_gen = min(efs_all_reps, [], 2);
-        plot(0:size(best_efs_per_gen, 1)-1, best_efs_per_gen, 'r--', 'LineWidth', 2);
+        plot(0:size(best_efs_per_gen, 1)-1, best_efs_per_gen, 'b', 'LineWidth', 2);
         xlabel('世代数');
-        ylabel('EF误差');
+        ylabel('最佳EF误差');
         title('重建收敛曲线 (部分)');
         grid on;
-    else
-        text(0.5, 0.5, '无法绘制收敛曲线', 'HorizontalAlignment', 'center');
     end
 end
 
-% 3D可视化重建结果
+% 手动对齐后的绝对误差图 (新增加的子图)
 subplot(2, 4, 8);
-surf(abs(R_final_reconstructed), 'EdgeColor', 'none');
-view(-30, 60);
-title('重建结果 3D 视图');
-colormap(jet);
-light;
-lighting gouraud;
-axis tight;
+manual_error_map = abs(abs(R_reconstructed_manual_aligned) - test_wavefront);
+imshow(manual_error_map, []);
+title('手动对齐后绝对误差图');
+colormap(gca, jet); % 使用彩色图
+colorbar; % 添加色条
 
-%% 结束
+% 将最终纠正后的图像和误差值保存到工作区变量 (作为最终结果)
+final_reconstruction_image = abs(R_reconstructed_manual_aligned);
+final_support_mask = S_all_gens(:,:,config.gen+1); % 最终支撑 (保持不变)
+final_ef_value = manual_ef_after_shift;
+final_er_value = manual_er_after_shift;
 
-disp('----------------------------------------------------');
-disp('   脚本执行完毕。请检查生成的图形窗口。');
-disp('----------------------------------------------------');
-
-% 提示关闭并行池
-if ~isempty(gcp('nocreate'))
-    fprintf('\n若不再需要并行计算, 请在命令行输入: delete(gcp)\n');
-end
+disp(' ');
+disp('脚本运行完成。所有重建结果和评估指标已显示在图窗中，并已保存到工作区变量。');

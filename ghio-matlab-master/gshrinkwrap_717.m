@@ -11,7 +11,7 @@
 % v.2 2014/06/06 : multiple following runs
 % v.3 2014/06/09 : use "template" to update each replica
 
-function [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n1, checker, gen, n2, rep, varargin)
+function [R, Sup, Rtmp, efs] = gshrinkwrap_717(Fabs, n1, checker, gen, n2, rep, varargin)
     % Enhanced guided shrink-wrap with parallel support
     
     % Parameter handling
@@ -58,8 +58,7 @@ function [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n1, checker, gen, n2, rep, vara
     % First generation
     parfor r = 1:rep
         try
-            % 替换 hio2d 为 ghio2d
-            [Rtmp(:,:,r), ~, ~] = ghio2d(Fabs, S, n1, 1, 1, checker, alpha);
+            Rtmp(:,:,r) = hio2d(Fabs, S, n1, checker, alpha);
             Ftmp(:,:,r) = fft2(Rtmp(:,:,r));
             efs(1,r) = ef(Fabs, Ftmp(:,:,r), checker);
         catch
@@ -88,11 +87,10 @@ function [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n1, checker, gen, n2, rep, vara
                 Stmp(:,:,r) = (Mtmp(:,:,r) >= cutoff2*max(Mtmp(:,:,r), [], 'all'));
                 
                 % HIO with new support
-                [Rtmp(:,:,r), ~, ~] = ghio2d(fft2(Rtmp(:,:,r)), Stmp(:,:,r), n2, 1, 1, checker, alpha);
+                Rtmp(:,:,r) = hio2d(fft2(Rtmp(:,:,r)), Stmp(:,:,r), n2, checker, alpha);
                 Ftmp(:,:,r) = fft2(Rtmp(:,:,r));
                 efs(g,r) = ef(Fabs, Ftmp(:,:,r), checker);
             catch
-                Rtmp(:,:,r) = zeros(base_size);
                 efs(g,r) = inf;
             end
         end
