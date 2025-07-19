@@ -45,6 +45,7 @@ Fabs_noisy = Fabs_data_shifted + noise_level * max(Fabs_data(:)) * randn(size(Fa
 
 if any(isnan(Fabs_noisy(:))) || any(isinf(Fabs_noisy(:)))
     error('衍射图样数据 Fabs_noisy 包含 NaN 或 Inf 值，请检查数据生成过程。');
+Fabs_noisy = Fabs_data_shifted; % 确保 Fabs_noisy 不为空或无效
 end
 disp('模拟衍射图样已计算完成，将作为重建算法的输入。');
 
@@ -52,12 +53,12 @@ disp('模拟衍射图样已计算完成，将作为重建算法的输入。');
 
 % [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n1, checker, gen, n2, rep, alpha, sigma, cutoff1, cutoff2, beta)
 config = struct(...
-    'n1',       500,       ... % 初始 HIO 迭代次数
-    'gen',      20,        ... % GSW 世代数 (支持更新次数)
+    'n1',       5000,      ... % 初始 HIO 迭代次数
+    'gen',      300,       ... % GSW 世代数 (支持更新次数)
     'n2',       80,        ... % 每代 HIO 内部迭代次数
     'rep',      4,         ... % 并行副本数 (用于引导式收缩包裹的鲁棒性)
     'alpha',    30,        ... % OSS 平滑系数 (过采样平滑，用于 hio2d.m)
-    'sigma',    1.5,         ... % 高斯模糊初始标准差 (用于生成新支撑)
+    'sigma',    1.5,       ... % 高斯模糊初始标准差 (用于生成新支撑)
     'cutoff1',  0.02,      ... % 自相关阈值 (用于从自相关图生成初始支撑)
     'cutoff2',  0.08,      ... % 支撑更新阈值 (用于从平滑图像生成新支撑)
     'beta',     0.85,      ... % HIO 反馈系数 (用于 hio2d.m)
@@ -121,7 +122,7 @@ if ~isempty(gcp('nocreate'))
     delete(gcp('nocreate'));
 end
 
-%% ==================== 6. 结果评估 ====================
+%%  6. 误差计算 
 [~, best_rep_idx] = min(efs_all_reps(end,:)); % 找到最后一世代EF误差最小的副本索引
 R_final_reconstructed = R_reconstructed_all_reps(:,:,best_rep_idx); % 获取最终重建结果
 
@@ -133,47 +134,55 @@ fprintf('\n----------------------------------------------------\n');
 fprintf('重建完成！\n');
 fprintf('原始最佳副本的最终EF误差: %.4f\n', final_ef);
 fprintf('原始最佳副本的最终ER误差: %.4f\n', final_er);
-fprintf('----------------------------------------------------\n');
 
-%% ==================== 第七阶段：手动对齐 (交互式) ====================
-% 在显示最终重建结果R_final_reconstructed之后，添加此段代码
+%% 7. 自动对齐 
 fprintf('\n----------------------------------------------------\n');
-fprintf('  手动对齐模式：请点击重建图像中的目标中心。\n');
-fprintf('  （点击后窗口会自动关闭，然后显示最终对比图）\n');
+fprintf('  自动对齐模式：正在识别重建图像中心并对齐。\n');
 fprintf('----------------------------------------------------\n');
 
-% 显示最终重建结果，让用户点击中心
-h_ginput_fig = figure('Name', '点击图像中心进行手动对齐', 'NumberTitle', 'off');
-imshow(abs(R_final_reconstructed), []); % 使用最终重建结果
-title('点击图像的中心点，然后按Enter键');
-axis on; % 显示坐标轴，便于观察
+% 图像二值化以识别对象; 找到重建图像的非零部分，并进行归一化
+reco_abs = abs(R_final_reconstructed);
+% 设定一个阈值来二值化图像
+binary_reco = imbinarize(reco_abs); 
+% 标记连通区域并计算其属性
+stats = regionprops(binary_reco, 'Area', 'Centroid');
 
-% 等待用户点击
-[x_click, y_click] = ginput(1); % 获取用户点击的坐标
-close(h_ginput_fig); % 关闭ginput的交互窗口
+if isempty(stats)
+    warning('未在重建图像中找到任何连通区域，无法进行自动对齐。');
+    R_reconstructed_auto_aligned = R_final_reconstructed; % 无法对齐，保持原样
+    auto_ef_after_shift = final_ef;
+    auto_er_after_shift = final_er;
+else
+    % 找到面积最大的连通区域，通常是目标对象
+    all_areas = [stats.Area];
+    [~, largest_idx] = max(all_areas);
+    
+    % 获取最大区域的质心
+    center_of_object = stats(largest_idx).Centroid;
+    
+    % 计算图像中心点
+    [rows, cols] = size(R_final_reconstructed);
+    image_center_x = cols / 2 + 0.5;
+    image_center_y = rows / 2 + 0.5;
+    
+    % 计算所需的平移量
+    shift_x_auto = round(image_center_x - center_of_object(1));
+    shift_y_auto = round(image_center_y - center_of_object(2));
+    
+    fprintf('检测到自动平移量: X=%d, Y=%d\n', shift_x_auto, shift_y_auto);
+    
+    % 应用自动平移
+    R_reconstructed_auto_aligned = circshift(R_final_reconstructed, [shift_y_auto, shift_x_auto]);
+    
+    % 重新计算自动对齐后的EF和ER误差
+    auto_ef_after_shift = ef(Fabs_noisy, fft2(R_reconstructed_auto_aligned), config.checker);
+    auto_er_after_shift = er(test_wavefront, abs(R_reconstructed_auto_aligned), []);
+    fprintf('自动对齐后 EF 误差: %.4f, ER 误差: %.4f\n', auto_ef_after_shift, auto_er_after_shift);
+end
 
-% 计算图像中心点
-[rows, cols] = size(R_final_reconstructed);
-image_center_x = cols / 2 + 0.5; % 确保中心点是浮点数，对于偶数/奇数尺寸都适用
-image_center_y = rows / 2 + 0.5;
+%% 8. 可视化
 
-% 计算所需的平移量
-shift_x_manual = round(image_center_x - x_click);
-shift_y_manual = round(image_center_y - y_click);
-
-fprintf('检测到手动平移量：X=%d, Y=%d\n', shift_x_manual, shift_y_manual);
-
-% 应用手动平移
-R_reconstructed_manual_aligned = circshift(R_final_reconstructed, [shift_y_manual, shift_x_manual]);
-
-% 重新计算手动对齐后的EF和ER误差
-manual_ef_after_shift = ef(Fabs_noisy, fft2(R_reconstructed_manual_aligned), config.checker);
-manual_er_after_shift = er(test_wavefront, abs(R_reconstructed_manual_aligned), []);
-fprintf('手动对齐后 EF 误差: %.4f, ER 误差: %.4f\n', manual_ef_after_shift, manual_er_after_shift);
-
-%% ==================== 第八阶段：可视化输出 (整合显示) ====================
-% 调整图窗大小以容纳更多子图
-figure('Name', '重建结果对比', 'NumberTitle', 'off', 'Position', [50, 50, 1500, 800]); 
+figure('Name', '重建结果对比', 'NumberTitle', 'off', 'Position', [50, 50, 1600, 800]); 
 
 % 原始图像
 subplot(2, 4, 1);
@@ -181,29 +190,8 @@ imshow(test_wavefront, []);
 title('原始图像');
 colormap(gca, gray);
 
-% 衍射图样 (对数显示)
-subplot(2, 4, 2);
-imshow(log(Fabs_data_shifted + 1), []);
-title('衍射图样 (对数显示)');
-colormap(gca, hot);
-
-% 原始重建结果
-subplot(2, 4, 3);
-imshow(abs(R_final_reconstructed), []);
-title(['原始重建 (EF=', num2str(final_ef, '%.3f'), ', ER=', num2str(final_er, '%.3f'), ')']);
-colormap(gca, jet); % 使用彩色图
-colorbar; % 添加色条
-
-% 原始绝对误差图
-subplot(2, 4, 4);
-error_map_original = abs(abs(R_final_reconstructed) - test_wavefront);
-imshow(error_map_original, []);
-title('原始绝对误差图');
-colormap(gca, jet); % 使用彩色图
-colorbar; % 添加色条
-
 % 最终收敛支撑
-subplot(2, 4, 5);
+subplot(2, 4, 2);
 if size(S_all_gens, 3) == config.gen + 1
     imshow(S_all_gens(:,:,config.gen+1), []); 
     title('最终收敛支撑');
@@ -212,15 +200,14 @@ else
 end
 colormap(gca, gray);
 
-% 手动对齐后的重建结果 (新增加的子图)
-subplot(2, 4, 6);
-imshow(abs(R_reconstructed_manual_aligned), []);
-title(['手动对齐后重建 (EF=', num2str(manual_ef_after_shift, '%.3f'), ', ER=', num2str(manual_er_after_shift, '%.3f'), ')']);
-colormap(gca, jet); % 使用彩色图
-colorbar; % 添加色条
+% 衍射图样 (对数显示)
+subplot(2, 4, 3);
+imshow(log(Fabs_data_shifted + 1), []);
+title('衍射图样 (对数显示)');
+colormap(gca, jet);
 
 % 收敛曲线 (各代最佳EF)
-subplot(2, 4, 7);
+subplot(2, 4, 4);
 if ~isempty(efs_all_reps) && size(efs_all_reps, 1) == config.gen + 1
     best_efs_per_gen = min(efs_all_reps, [], 2); % 每代所有副本中的最佳EF
     plot(0:config.gen, best_efs_per_gen, 'b', 'LineWidth', 2); % 从第0代开始
@@ -242,19 +229,38 @@ else
     end
 end
 
-% 手动对齐后的绝对误差图 (新增加的子图)
-subplot(2, 4, 8);
-manual_error_map = abs(abs(R_reconstructed_manual_aligned) - test_wavefront);
-imshow(manual_error_map, []);
-title('手动对齐后绝对误差图');
-colormap(gca, jet); % 使用彩色图
-colorbar; % 添加色条
+% 原始重建结果
+subplot(2, 4, 5);
+imshow(abs(R_final_reconstructed), []);
+title(['原始重建 (EF=', num2str(final_ef, '%.3f'), ', ER=', num2str(final_er, '%.3f'), ')']);
+colormap(gca, gray); 
 
-% 将最终纠正后的图像和误差值保存到工作区变量 (作为最终结果)
-final_reconstruction_image = abs(R_reconstructed_manual_aligned);
-final_support_mask = S_all_gens(:,:,config.gen+1); % 最终支撑 (保持不变)
-final_ef_value = manual_ef_after_shift;
-final_er_value = manual_er_after_shift;
+% 原始绝对误差图
+subplot(2, 4, 6);
+error_map_original = abs(abs(R_final_reconstructed) - test_wavefront);
+imshow(error_map_original, []);
+title('原始绝对误差图');
+colormap(gca, jet); 
+
+% 自动对齐后的重建结果
+subplot(2, 4, 7);
+imshow(abs(R_reconstructed_auto_aligned), []);
+title(['对齐后重建 (EF=', num2str(auto_ef_after_shift, '%.3f'), ', ER=', num2str(auto_er_after_shift, '%.3f'), ')']);
+colormap(gca, gray); 
+ 
+
+% 自动对齐后的绝对误差图 (现在更大)
+subplot(2, 4, 8);
+auto_error_map = abs(abs(R_reconstructed_auto_aligned) - test_wavefront);
+imshow(auto_error_map, []);
+title('对齐后绝对误差图');
+colormap(gca, jet); 
+
+
+final_reconstruction_image = abs(R_reconstructed_auto_aligned);
+final_support_mask = S_all_gens(:,:,config.gen+1);  % 最终支撑 (保持不变)
+final_ef_value = auto_ef_after_shift;
+final_er_value = auto_er_after_shift;
 
 disp(' ');
 disp('脚本运行完成。所有重建结果和评估指标已显示在图窗中，并已保存到工作区变量。');

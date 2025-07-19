@@ -6,10 +6,6 @@
 %     "X-ray image reconstruction from a diffraction pattern alone,"
 %     Phys. Rev. B 68, 140101 (2003).
 % [2] Chen et al., Phys. Rev. B 76, 064113 (2007).
-%     
-% v.1 2014/06/03 : multiple seed
-% v.2 2014/06/06 : multiple following runs
-% v.3 2014/06/09 : use "template" to update each replica
 
 function [R, Sup, Rtmp, efs] = gshrinkwrap(Fabs, n1, checker, gen, n2, rep, varargin)
     % Enhanced guided shrink-wrap with parallel support
